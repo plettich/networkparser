@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
+from six import python_2_unicode_compatible
 import codecs
 import netaddr
-from pyparsing import White, Word, alphanums, CharsNotIn
-from pyparsing import Forward, Group, OneOrMore
-from pyparsing import pythonStyleComment
 from pyparsing import Literal, White, Word, alphanums, CharsNotIn
 from pyparsing import Forward, Group, Optional, OneOrMore, ZeroOrMore
 from pyparsing import pythonStyleComment, Regex, SkipTo
 
 
+@python_2_unicode_compatible
 class Interface(object):
     """
     This represents an interface entry in /etc/network/interfaces.
@@ -58,7 +57,6 @@ class Interface(object):
             calculated from UP and netmask
         :param gateway: The gateway
         :param nameserver: list of nameserver
-        :type param: basestring
         :return: an interface object
         """
         self.options = options or []
@@ -94,9 +92,8 @@ class Interface(object):
         This returns the Interface, just like it would be printed in
         /etc/networks/interfaces
         """
-        iface = []
-        iface.append("auto %s" % self.iface)
-        iface.append("iface %s inet %s" % (self.iface, self.mode))
+        iface = ["auto %s" % self.iface,
+                 "iface %s inet %s" % (self.iface, self.mode)]
         if self.ip:
             iface.append("\taddress %s" % self.ip)
         if self.netmask:
@@ -112,7 +109,7 @@ class Interface(object):
         for op in self.options:
             iface.append("\t%s" % op)
 
-        return "\n".join(iface)
+        return u"\n".join(iface)
 
 
 class NetworkParser(object):
@@ -122,15 +119,15 @@ class NetworkParser(object):
     space = White().suppress()
     value = CharsNotIn("{}\n#")
     line = Regex("^.*$")
-    comment = ("#")
+    comment = "#"
     method = Regex("loopback|manual|dhcp|static")
     stanza = Regex("auto|iface|mapping")
-    option_key = Regex("bridge_\w*|post-\w*|up|down|pre-\w*|address"
-                       "|network|netmask|gateway|broadcast|dns-\w*|scope|"
-                       "pointtopoint|metric|hwaddress|mtu|hostname|"
-                       "leasehours|leasetime|vendor|client|bootfile|server"
-                       "|mode|endpoint|dstaddr|local|ttl|provider|unit"
-                       "|options|frame|netnum|media")
+    option_key = Regex(r"bridge_\w*|post-\w*|up|down|pre-\w*|address"
+                       r"|network|netmask|gateway|broadcast|dns-\w*|scope|"
+                       r"pointtopoint|metric|hwaddress|mtu|hostname|"
+                       r"leasehours|leasetime|vendor|client|bootfile|server"
+                       r"|mode|endpoint|dstaddr|local|ttl|provider|unit"
+                       r"|options|frame|netnum|media")
     _eol = Literal("\n").suppress()
     option = Forward()
     option << Group(space
@@ -214,7 +211,6 @@ class NetworkParser(object):
             address 1.1.1.1
             netmask 255.255.255.0
 
-        :param interface: dictionary of interface
         :return: string
         """
         output = ""
@@ -223,14 +219,13 @@ class NetworkParser(object):
                 output += "auto %s\n" % iface
 
             output += "iface %s inet %s\n" % (iface, iconfig.get("method",
-                                                               "manual"))
+                                                                 "manual"))
             # options
             for opt_key, opt_value in iconfig.get("options", {}).items():
                 output += "    %s %s\n" % (opt_key, opt_value)
             # add a new line
             output += "\n"
         return output
-
 
     def get_interfaces(self):
         """

@@ -9,7 +9,8 @@ setup(name='networkparser',
       url='https://github.com/privacyidea/networkparser',
       py_modules=['networkparser'],
       install_requires=[
+            'netaddr',
             'pyparsing>=2.0',
-            'netaddr'
+            'six'
       ]
 )

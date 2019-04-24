@@ -4,8 +4,7 @@
 import logging
 log = logging.getLogger(__name__)
 import unittest
-import os
-from networkparser import Interface, NetworkParser
+from .networkparser import Interface, NetworkParser
 
 
 class TestInterface(unittest.TestCase):
@@ -48,7 +47,7 @@ class TestInterface(unittest.TestCase):
         iface = Interface("eth0", "static", "1.1.1.1", nameserver="1.1.1.2 "
                                                                   "1.1.1.3")
         p = "%s" % iface
-        print "\n%s" % p
+        print("\n%s" % p)
         self.assertTrue("address 1.1.1." in p)
         self.assertTrue("iface eth0 inet static" in p)
         self.assertTrue("netmask 255.255.255.0" in p)
